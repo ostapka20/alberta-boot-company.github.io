@@ -37,10 +37,20 @@ function loadDashboard(){
   const added=rows.filter(r=>r.record_type==="leather_added").reduce((s,r)=>s+Number(r.sqft||0),0);
   const scrap=rows.filter(r=>r.record_type==="scrap").reduce((s,r)=>s+Number(r.sqft||0),0);
   const pairs=rows.filter(r=>r.record_type==="production").reduce((s,r)=>s+Number(r.pairs||0),0);
-  $("dashAdded").textContent=`${fmt(added)} SqFt`; $("dashScrap").textContent=`${fmt(scrap)} SqFt`; $("dashPairs").textContent=pairs.toLocaleString(); $("dashNet").textContent=`${fmt(added-scrap)} SqFt`;
-  const inv={}; records.filter(r=>r.record_type!=="production").forEach(r=>{const k=(r.leather_type||"Unknown").trim();inv[k]=(inv[k]||0)+(r.record_type==="scrap"?-Number(r.sqft||0):Number(r.sqft||0))});
-  const rowsHtml=Object.entries(inv).sort((a,b)=>a[0].localeCompare(b[0])).map(([k,v])=>`<tr><td>${esc(k)}</td><td>${fmt(v)} SqFt</td></tr>`).join("");
-  $("inventoryTable").innerHTML=rowsHtml?`<table class="table"><thead><tr><th>Leather Type</th><th>Current Inventory</th></tr></thead><tbody>${rowsHtml}</tbody></table>`:`<div class="empty">No leather inventory yet.</div>`;
+  $("dashAdded").textContent=`${fmt(added)} SqFt`; $("dashScrap").textContent=`${fmt(scrap)} SqFt`; $("dashPairs").textContent=pairs.toLocaleString();
+  const byType = new Map();
+  rows.filter(r=>r.record_type==="leather_added").forEach(r=>{
+    const name=(r.leather_type||"").trim();
+    const key=name.toLocaleLowerCase();
+    const existing=byType.get(key)||{name,amount:0};
+    existing.amount+=Number(r.sqft||0);
+    byType.set(key,existing);
+  });
+  const dailyRows=[...byType.values()].sort((a,b)=>a.name.localeCompare(b.name))
+    .map(r=>`<tr><td>${esc(r.name)}</td><td>${fmt(r.amount)} SqFt</td></tr>`).join("");
+  $("dailyLeatherTable").innerHTML=dailyRows
+    ? `<table class="table"><thead><tr><th>Leather Type</th><th>Added on Selected Date</th></tr></thead><tbody>${dailyRows}</tbody></table>`
+    : '<div class="empty">No leather added on this date.</div>';
 }
 function rowActions(r){return `<button class="action-btn" onclick="openEdit('${r.id}')">Edit</button><button class="action-btn danger" onclick="deleteRecord('${r.id}')">Delete</button>`}
 function renderTable(list, target){
