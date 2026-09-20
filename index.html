@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alberta Boot Company</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="loading" class="loading">Loading…</div>
+
+  <section id="authView" class="auth-view hidden">
+    <div class="auth-card">
+      <div class="brand">Alberta Boot Company</div>
+      <p class="muted">Production database</p>
+      <form id="loginForm">
+        <label>Email<input id="loginEmail" type="email" required></label>
+        <label>Password<input id="loginPassword" type="password" required></label>
+        <button class="primary" type="submit">Sign in</button>
+        <p id="authMessage" class="message"></p>
+      </form>
+    </div>
+  </section>
+
+  <div id="appView" class="app hidden">
+    <aside class="sidebar">
+      <div class="brand">Alberta Boot Company</div>
+      <nav>
+        <button class="nav-item active" data-page="dashboard">Dashboard</button>
+        <button class="nav-item" data-page="database">Database</button>
+        <button class="nav-item" data-page="leather">Leather</button>
+        <button class="nav-item" data-page="production">Production</button>
+        <button class="nav-item" data-page="add">Add Data</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div id="userEmail" class="user-email"></div>
+        <button id="logoutBtn" class="nav-item">Sign out</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1 id="pageTitle">Dashboard</h1>
+          <p id="pageSubtitle" class="muted">Daily production overview</p>
+        </div>
+        <div class="date-control">
+          <label>Dashboard date<input id="dashboardDate" type="date"></label>
+        </div>
+      </header>
+
+      <div id="toast" class="toast"></div>
+
+      <section id="page-dashboard" class="page">
+        <div class="cards">
+          <div class="card"><span>Leather Added</span><strong id="dashAdded">0.00 SqFt</strong></div>
+          <div class="card"><span>Scrap</span><strong id="dashScrap">0.00 SqFt</strong></div>
+          <div class="card"><span>Pairs Made</span><strong id="dashPairs">0</strong></div>
+          <div class="card"><span>Net Leather Added</span><strong id="dashNet">0.00 SqFt</strong></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h2>Current Leather Inventory</h2></div>
+          <div id="inventoryTable"></div>
+        </div>
+      </section>
+
+      <section id="page-database" class="page hidden">
+        <div class="panel">
+          <div class="filters">
+            <label>Search<input id="dbSearch" placeholder="Search leather type…"></label>
+            <label>From<input id="dbFrom" type="date"></label>
+            <label>To<input id="dbTo" type="date"></label>
+            <label>Type
+              <select id="dbType">
+                <option value="all">All</option>
+                <option value="leather_added">Leather Added</option>
+                <option value="scrap">Scrap</option>
+                <option value="production">Pairs Made</option>
+              </select>
+            </label>
+            <button id="dbFilter" class="primary filter-button">Apply</button>
+            <button id="dbClear" class="secondary filter-button">Clear</button>
+          </div>
+          <div id="databaseTable"></div>
+        </div>
+      </section>
+
+      <section id="page-leather" class="page hidden">
+        <div class="page-actions"><button class="primary" data-open-add="leather_added">+ Add Leather</button><button class="secondary" data-open-add="scrap">+ Add Scrap</button></div>
+        <div class="panel"><div id="leatherTable"></div></div>
+      </section>
+
+      <section id="page-production" class="page hidden">
+        <div class="page-actions"><button class="primary" data-open-add="production">+ Add Production</button></div>
+        <div class="panel"><div id="productionTable"></div></div>
+      </section>
+
+      <section id="page-add" class="page hidden">
+        <div class="panel form-panel">
+          <h2>Add Record</h2>
+          <form id="recordForm">
+            <label>Date<input id="recordDate" type="date" required></label>
+            <label>Record type
+              <select id="recordType">
+                <option value="leather_added">Leather Added</option>
+                <option value="scrap">Scrap</option>
+                <option value="production">Pairs Made</option>
+              </select>
+            </label>
+            <label id="leatherTypeWrap">Leather type<input id="leatherType" placeholder="e.g. Seidel" required></label>
+            <label id="sqftWrap">SqFt<input id="sqft" type="number" min="0" step="0.01" required></label>
+            <label id="pairsWrap" class="hidden">Pairs made<input id="pairs" type="number" min="0" step="1"></label>
+            <button class="primary" type="submit">Save record</button>
+            <button class="secondary" type="button" id="cancelEdit">Cancel</button>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-card">
+      <h2>Edit Record</h2>
+      <form id="editForm">
+        <input id="editId" type="hidden">
+        <label>Date<input id="editDate" type="date" required></label>
+        <label>Record type<select id="editType" disabled><option value="leather_added">Leather Added</option><option value="scrap">Scrap</option><option value="production">Pairs Made</option></select></label>
+        <label id="editLeatherWrap">Leather type<input id="editLeatherType"></label>
+        <label id="editSqftWrap">SqFt<input id="editSqft" type="number" min="0" step="0.01"></label>
+        <label id="editPairsWrap">Pairs made<input id="editPairs" type="number" min="0" step="1"></label>
+        <div class="modal-actions"><button class="primary" type="submit">Save changes</button><button class="secondary" type="button" id="closeModal">Cancel</button></div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
